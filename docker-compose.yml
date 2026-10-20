@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  fraudlens-api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow-server:5000
+    depends_on:
+      - mlflow-server
+
+  mlflow-server:
+    image: python:3.12-slim
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/mlruns
+      - ./requirements.txt:/requirements.txt
+    command: >
+      bash -c "pip install -r requirements.txt &&
+      mlflow server --backend-store-uri sqlite:///mlruns/mlflow.db --default-artifact-root /mlruns --host 0.0.0.0 --port 5000"
